@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-font="Poppins" data-font-scale="medium" data-app-scale="standard"
+  data-theme-gradient="purple">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>QueueTimer — Modern Goal & Queue Engine</title>
+
+  <!-- FontAwesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Google Fonts CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=DM+Sans:wght@400;500;700&family=Instrument+Serif&family=JetBrains+Mono:wght@400;600&family=Noto+Serif:wght@400;600&family=Playfair+Display:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ==================== CSS VARIABLES & THEMES ==================== */
+    :root {
+      --app-scale-factor: 1;
+      --font-scale-factor: 1;
+      /* Light Theme Default */
+      --bg-base: #f1f5f9;
+      --bg-surface: rgba(255, 255, 255, 0.95);
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --bg-element: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: rgba(0, 0, 0, 0.12);
+      --circle-track: #e2e8f0;
+      --danger-color: #f43f5e;
+      --success-color: #10b981;
+      /* Solid Accent Defaults */
+      --accent-solid: #8f1eae;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(143, 30, 174, 0.4);
+    }
+
+    /* Dark Theme Override */
+    [data-theme="dark"] {
+      --bg-base: #080a0f;
+      --bg-surface: rgba(18, 22, 31, 0.92);
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.08);
+      --bg-element: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #8e9bb0;
+      --border-color: rgba(255, 255, 255, 0.12);
+      --circle-track: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Solid Color Themes (Backward compatible with data-theme-gradient and data-theme-color) */
+    [data-theme-color="yellow"],
+    [data-theme-gradient="yellow"] {
+      --accent-solid: #fad02c;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(250, 208, 44, 0.4);
+    }
+
+    [data-theme-color="orange"],
+    [data-theme-gradient="orange"] {
+      --accent-solid: #fc4c00;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(252, 76, 0, 0.4);
+    }
+
+    [data-theme-color="red"],
+    [data-theme-gradient="red"] {
+      --accent-solid: #bd0000;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(189, 0, 0, 0.4);
+    }
+
+    [data-theme-color="pink"],
+    [data-theme-gradient="pink"] {
+      --accent-solid: #ff3d77;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(255, 61, 119, 0.4);
+    }
+
+    [data-theme-color="purple"],
+    [data-theme-gradient="purple"] {
+      --accent-solid: #8f1eae;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(143, 30, 174, 0.4);
+    }
+
+    [data-theme-color="blue"],
+    [data-theme-gradient="blue"] {
+      --accent-solid: #0084bd;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(0, 132, 189, 0.4);
+    }
+
+    [data-theme-color="green"],
+    [data-theme-gradient="green"] {
+      --accent-solid: #007d57;
+      --accent-grad: var(--accent-solid);
+      --accent-glow: rgba(0, 125, 87, 0.4);
+    }
+
+    /* Fonts & Scales */
+    [data-font="Poppins"] {
+      --font-family: 'Poppins', sans-serif;
+    }
+
+    [data-font="DM Sans"] {
+      --font-family: 'DM Sans', sans-serif;
+    }
+
+    [data-font="Plus Jakarta Sans"] {
+      --font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    [data-font="JetBrains Mono"] {
+      --font-family: 'JetBrains Mono', monospace;
+    }
+
+    [data-font="Playfair Display"] {
+      --font-family: 'Playfair Display', serif;
+    }
+
+    [data-font="Instrument Serif"] {
+      --font-family: 'Instrument Serif', serif;
+    }
+
+    [data-font="Comic Neue"] {
+      --font-family: 'Comic Neue', cursive;
+    }
+
+    [data-font="Noto Serif"] {
+      --font-family: 'Noto Serif', serif;
+    }
+
+    [data-font="System UI"] {
+      --font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    [data-font-scale="x-small"] {
+      --font-scale-factor: 0.82;
+    }
+
+    [data-font-scale="small"] {
+      --font-scale-factor: 0.91;
+    }
+
+    [data-font-scale="medium"] {
+      --font-scale-factor: 1.0;
+    }
+
+    [data-font-scale="large"] {
+      --font-scale-factor: 1.12;
+    }
+
+    [data-font-scale="x-large"] {
+      --font-scale-factor: 1.25;
+    }
+
+    [data-app-scale="compact"] {
+      --app-scale-factor: 0.85;
+    }
+
+    [data-app-scale="standard"] {
+      --app-scale-factor: 1.0;
+    }
+
+    [data-app-scale="large"] {
+      --app-scale-factor: 1.15;
+    }
+
+    [data-app-scale="x-large"] {
+      --app-scale-factor: 1.30;
+    }
+
+    /* ==================== GLOBAL STYLES & LAYOUT ==================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      font-size: calc(0.95rem * var(--font-scale-factor) * var(--app-scale-factor));
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    html,
+    body {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .app-viewport {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ==================== NAVIGATION ==================== */
+    .sidebar {
+      width: calc(80px * var(--app-scale-factor));
+      height: 100vh;
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: calc(18px * var(--app-scale-factor)) 0;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      font-size: calc(1.6rem * var(--app-scale-factor));
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: calc(12px * var(--app-scale-factor));
+    }
+
+    .nav-top-group {
+      display: flex;
+      flex-direction: column;
+      gap: calc(12px * var(--app-scale-factor));
+      align-items: center;
+      width: 100%;
+    }
+
+    .nav-btn {
+      width: calc(46px * var(--app-scale-factor));
+      height: calc(46px * var(--app-scale-factor));
+      border-radius: calc(14px * var(--app-scale-factor));
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: calc(1.2rem * var(--app-scale-factor));
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn:hover {
+      background: var(--bg-element);
+      color: var(--text-main);
+    }
+
+    .nav-btn.active {
+      background: var(--accent-grad);
+      color: #ffffff;
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    .avatar-btn {
+      width: calc(44px * var(--app-scale-factor));
+      height: calc(44px * var(--app-scale-factor));
+      border-radius: 50%;
+      background: var(--accent-grad);
+      color: #ffffff;
+      font-weight: 700;
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: calc(0.95rem * var(--font-scale-factor) * var(--app-scale-factor));
+      box-shadow: 0 4px 14px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    /* ==================== WORKSPACE & HEADERS ==================== */
+    .content-container {
+      flex: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background-color: var(--bg-base);
+    }
+
+    /* Top App Header (Logo Left, User Profile Right) */
+    header.app-header {
+      padding: calc(12px * var(--app-scale-factor)) calc(20px * var(--app-scale-factor));
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .header-logo-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: calc(1.1rem * var(--font-scale-factor) * var(--app-scale-factor));
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Dedicated Tab Title & Motivation Banner Below Header */
+    .tab-title-banner {
+      padding: calc(12px * var(--app-scale-factor)) calc(20px * var(--app-scale-factor));
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tab-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tab-title-text {
+      font-size: calc(1.1rem * var(--font-scale-factor) * var(--app-scale-factor));
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .motivation-quote {
+      font-size: calc(0.8rem * var(--font-scale-factor) * var(--app-scale-factor));
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .tab-panel {
+      display: none;
+      padding: calc(20px * var(--app-scale-factor));
+      max-width: 850px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==================== BUTTONS & UI CONTROLS ==================== */
+    .btn-icon {
+      width: calc(38px * var(--app-scale-factor));
+      height: calc(38px * var(--app-scale-factor));
+      border-radius: calc(10px * var(--app-scale-factor));
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: calc(1rem * var(--app-scale-factor));
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-icon.primary {
+      background: var(--accent-grad);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-icon.danger {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--danger-color);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-icon.danger:hover {
+      background: var(--danger-color);
+      color: #ffffff;
+    }
+
+    .btn-icon.large {
+      width: calc(56px * var(--app-scale-factor));
+      height: calc(56px * var(--app-scale-factor));
+      border-radius: 50%;
+    }
+
+    .btn-text {
+      padding: 6px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-text.primary {
+      background: var(--accent-grad);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    /* ==================== TIMER DIAL & CARDS ==================== */
+    .timer-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: calc(14px * var(--app-scale-factor));
+      margin-bottom: calc(20px * var(--app-scale-factor));
+    }
+
+    .timer-controls-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .timer-circle-wrap {
+      position: relative;
+      width: calc(280px * var(--app-scale-factor));
+      height: calc(280px * var(--app-scale-factor));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .timer-circle-wrap svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .circle-track {
+      fill: none;
+      stroke: var(--circle-track);
+      stroke-width: 7;
+    }
+
+    .circle-progress {
+      fill: none;
+      stroke: var(--accent-solid);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 565.48;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.3s linear;
+      filter: drop-shadow(0 0 8px var(--accent-glow));
+    }
+
+    .circle-inner-content {
+      position: absolute;
+      width: 78%;
+      height: 78%;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .active-timer-title {
+      font-size: calc(0.85rem * var(--font-scale-factor) * var(--app-scale-factor));
+      color: var(--text-muted);
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .active-time-digits {
+      font-size: clamp(1.8rem, calc(2.4rem * var(--font-scale-factor) * var(--app-scale-factor)), 3.2rem);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      margin: 4px 0;
+    }
+
+    .direction-badge {
+      font-size: calc(0.65rem * var(--font-scale-factor) * var(--app-scale-factor));
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: var(--bg-element);
+      color: var(--text-main);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .quick-add-time-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .quick-time-btn {
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: calc(0.75rem * var(--font-scale-factor) * var(--app-scale-factor));
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .quick-time-btn:hover {
+      background: var(--accent-solid);
+      color: #fff;
+    }
+
+    .stack-progress-bar-wrap {
+      width: 100%;
+      margin-bottom: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .stack-progress-bar-wrap.active {
+      display: block;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: var(--bg-element);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-grad);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Container Glass Card */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: calc(14px * var(--app-scale-factor));
+      padding: calc(16px * var(--app-scale-factor));
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    .panel-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .queue-list-items {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .queue-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .queue-item.active {
+      border-color: var(--accent-solid);
+      background: var(--bg-element);
+    }
+
+    .queue-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Flexible Responsive Form Bar */
+    .input-inline-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: calc(12px * var(--app-scale-factor));
+      padding: 6px 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-inline-bar input[type="text"] {
+      flex: 1;
+      min-width: 100px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      padding: 4px 6px;
+    }
+
+    .time-num-input {
+      width: calc(44px * var(--app-scale-factor));
+      text-align: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      padding: 4px 2px;
+      outline: none;
+    }
+
+    .time-num-input:focus,
+    .input-inline-bar input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent-solid);
+    }
+
+    /* ==================== STACKS BUILDER & CARDS ==================== */
+    .sub-timer-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      background: var(--bg-surface);
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .sub-timer-row input[type="text"] {
+      flex: 1;
+      min-width: 100px;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .stack-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stack-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pill {
+      background: var(--bg-element);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: calc(0.72rem * var(--font-scale-factor) * var(--app-scale-factor));
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ==================== HISTORY & STATS ==================== */
+    .stats-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-card .stat-val {
+      font-size: calc(1.2rem * var(--font-scale-factor) * var(--app-scale-factor));
+      font-weight: 700;
+      color: var(--accent-solid);
+      margin-top: 4px;
+    }
+
+    .history-date-header {
+      font-weight: 700;
+      font-size: calc(0.85rem * var(--font-scale-factor) * var(--app-scale-factor));
+      color: var(--text-muted);
+      margin: 14px 0 6px 0;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 4px;
+    }
+
+    .data-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .data-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 24px;
+      font-style: italic;
+    }
+
+    /* ==================== SETTINGS & INPUTS ==================== */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .setting-label span {
+      font-weight: 600;
+    }
+
+    .gradient-picker-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .grad-swatch {
+      width: calc(26px * var(--app-scale-factor));
+      height: calc(26px * var(--app-scale-factor));
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .grad-swatch.active {
+      border-color: var(--text-main);
+      transform: scale(1.15);
+    }
+
+    select,
+    input[type="text"].styled-input {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .shortcuts-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .shortcuts-table td {
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: calc(0.82rem * var(--font-scale-factor) * var(--app-scale-factor));
+    }
+
+    kbd {
+      background: var(--bg-element);
+      border: 1px solid var(--border-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    /* ==================== MOBILE & ZOOM RESPONSIVENESS ==================== */
+    @media (max-width: 768px) {
+      .app-viewport {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100vw;
+        height: calc(60px * var(--app-scale-factor));
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        flex-direction: row;
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        padding: 0 12px;
+        background: var(--bg-surface);
+        backdrop-filter: blur(20px);
+      }
+
+      .brand-logo,
+      .sidebar .avatar-btn {
+        display: none;
+      }
+
+      .nav-top-group {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+      }
+
+      .content-container {
+        height: 100vh;
+        padding-bottom: calc(75px * var(--app-scale-factor));
+      }
+
+      .tab-panel {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div id="sr-announcements" class="sr-only" aria-live="polite"></div>
+
+  <div class="app-viewport">
+
+    <!-- NAVIGATION SIDEBAR (DESKTOP) / BOTTOM BAR (MOBILE) -->
+    <nav class="sidebar" role="tablist" aria-label="Main Navigation">
+      <div class="brand-logo" title="QueueTimer">
+        <i class="fa-solid fa-bolt-lightning"></i>
+      </div>
+
+      <div class="nav-top-group">
+        <button class="nav-btn active" role="tab" id="tab-btn-timer" aria-selected="true" title="Timer (Key: 1)"
+          onclick="switchTab('timer')">
+          <i class="fa-solid fa-clock"></i>
+        </button>
+
+        <button class="nav-btn" role="tab" id="tab-btn-stack" aria-selected="false" title="Goal Stacks (Key: 2)"
+          onclick="switchTab('stack')">
+          <i class="fa-solid fa-layer-group"></i>
+        </button>
+
+        <button class="nav-btn" role="tab" id="tab-btn-history" aria-selected="false" title="History Log (Key: 3)"
+          onclick="switchTab('history')">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </button>
+
+        <button class="nav-btn" role="tab" id="tab-btn-bin" aria-selected="false" title="Recycle Bin (Key: 4)"
+          onclick="switchTab('bin')">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+
+        <button class="nav-btn" role="tab" id="tab-btn-settings" aria-selected="false" title="Settings (Key: 5)"
+          onclick="switchTab('settings')">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
+
+      <!-- Desktop Profile Avatar Button -->
+      <button class="avatar-btn" id="tab-btn-profile" role="tab" aria-selected="false"
+        title="Profile & Shortcuts (Key: 6)" onclick="switchTab('profile')">
+        <span class="avatar-initials">U</span>
+      </button>
+    </nav>
+
+    <!-- CONTENT WORKSPACE -->
+    <main class="content-container">
+
+      <!-- HEADER (LOGO LEFT, USER PROFILE RIGHT) -->
+      <header class="app-header">
+        <div class="header-logo-title">
+          <i class="fa-solid fa-bolt-lightning"></i>
+          <span>QueueTimer</span>
+        </div>
+
+        <button class="avatar-btn" id="mobile-header-avatar" title="Profile & Shortcuts" onclick="switchTab('profile')">
+          <span class="avatar-initials">U</span>
+        </button>
+      </header>
+
+      <!-- SUB-HEADER TAB BANNER (TITLE & MOTIVATION BELOW HEADER) -->
+      <div class="tab-title-banner">
+        <div class="tab-title-row">
+          <div class="tab-title-text" id="header-tab-title">
+            <i class="fa-solid fa-clock"></i> <span>Timer Workspace</span>
+          </div>
+        </div>
+        <div class="motivation-quote" id="motivation-banner-text">"Focus on progress, not perfection."</div>
+      </div>
+
+      <!-- TAB 1: TIMER PANEL -->
+      <section id="panel-timer" class="tab-panel active" role="tabpanel">
+
+        <!-- Active Goal Stack Progress Bar -->
+        <div id="stack-progress-wrap" class="stack-progress-bar-wrap">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; font-weight:600;">
+            <span id="stack-progress-title">Active Stack</span>
+            <span id="stack-progress-text">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="stack-progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="timer-center">
+
+          <!-- Top Controls Bar -->
+          <div class="timer-controls-bar">
+            <!-- Voice Switch -->
+            <button class="btn-icon" id="quick-voice-btn" title="Toggle Speech Announcements" aria-label="Toggle Voice"
+              onclick="toggleVoiceAnnounce()">
+              <i class="fa-solid fa-comment-dots" id="quick-voice-icon"></i>
+            </button>
+
+            <!-- Sound FX Switch -->
+            <button class="btn-icon" id="quick-sound-btn" title="Toggle Timer Beep Sounds" aria-label="Toggle Sound"
+              onclick="toggleSoundFx()">
+              <i class="fa-solid fa-volume-high" id="quick-sound-icon"></i>
+            </button>
+
+            <!-- Count Mode Toggle -->
+            <button class="btn-icon" title="Switch Count-Down / Count-Up Mode" aria-label="Switch Direction"
+              onclick="toggleDirection()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+          </div>
+
+          <!-- Timer Dial Ring -->
+          <div class="timer-circle-wrap" onclick="toggleDirection()" title="Click to Switch Direction">
+            <svg viewBox="0 0 200 200">
+              <circle class="circle-track" cx="100" cy="100" r="90" />
+              <circle id="circle-progress" class="circle-progress" cx="100" cy="100" r="90" />
+            </svg>
+            <div class="circle-inner-content">
+              <div id="current-timer-name" class="active-timer-title">No Active Timer</div>
+              <div id="time-display" class="active-time-digits">00:00:00</div>
+              <div id="direction-badge" class="direction-badge">
+                <i class="fa-solid fa-arrow-down-long" id="direction-icon"></i>
+                <span id="direction-text">Count-Down</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Time Add Extension Buttons -->
+          <div class="quick-add-time-group">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Add Time:</span>
+            <button class="quick-time-btn" onclick="addTimeToCurrent(60)">+1m</button>
+            <button class="quick-time-btn" onclick="addTimeToCurrent(300)">+5m</button>
+            <button class="quick-time-btn" onclick="addTimeToCurrent(600)">+10m</button>
+            <button class="quick-time-btn" onclick="addTimeToCurrent(900)">+15m</button>
+          </div>
+
+          <!-- Main Controls -->
+          <div style="display:flex; gap:14px; align-items:center;">
+            <button class="btn-icon" title="Reset Active Timer (Key: R)" aria-label="Reset Timer"
+              onclick="resetCurrentTimer()">
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+
+            <button id="btn-start" class="btn-icon large primary" title="Start/Pause (Space)" aria-label="Start Timer"
+              onclick="toggleTimer()">
+              <i class="fa-solid fa-play" id="start-icon"></i>
+            </button>
+
+            <button class="btn-icon" title="Skip to Next Timer (Key: S)" aria-label="Skip Timer" onclick="skipTimer()">
+              <i class="fa-solid fa-forward-step"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Queue Glass Card -->
+        <div class="glass-card">
+          <div class="panel-header-row">
+            <span style="font-weight:600;"><i class="fa-solid fa-list-ol"></i> Queue List</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-icon danger" style="width:30px; height:30px;" title="Clear Queue"
+                aria-label="Clear Queue" onclick="clearQueue()">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+
+          <ul id="queue-list" class="queue-list-items">
+            <!-- Dynamic Queue Items -->
+          </ul>
+
+          <!-- Flexible Queue Form -->
+          <form class="input-inline-bar" onsubmit="addManualTimer(event)">
+            <input type="text" id="manual-name" placeholder="Timer Task Name" class="nav-input"
+              aria-label="Timer Task Name" required>
+            <input type="number" class="time-num-input nav-input" id="manual-hr" placeholder="00h" min="0" max="99">
+            <input type="number" class="time-num-input nav-input" id="manual-min" placeholder="25m" min="0" max="59">
+            <input type="number" class="time-num-input nav-input" id="manual-sec" placeholder="00s" min="0" max="59">
+
+            <select id="queue-insert-pos" class="nav-input" style="padding:4px; border-radius:6px; font-size:0.8rem;">
+              <option value="bottom">At Bottom</option>
+              <option value="next">Run Next</option>
+            </select>
+
+            <button type="submit" class="btn-icon primary" style="width:34px; height:34px;" title="Add Timer to Queue"
+              aria-label="Add Timer">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- TAB 2: GOAL STACK PANEL -->
+      <section id="panel-stack" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div style="font-weight:600; margin-bottom:10px;" id="stack-form-heading">Create New Goal Stack</div>
+          <form onsubmit="saveNewStack(event)">
+            <input type="hidden" id="editing-stack-id" value="">
+            <input type="text" id="stack-title" class="styled-input nav-input"
+              placeholder="Workflow Title (e.g. Pomodoro Session)" style="width:100%; margin-bottom:12px;" required>
+
+            <div id="sub-timer-container">
+              <!-- Dynamic sub-timer rows -->
+            </div>
+
+            <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+              <button type="button" class="btn-text" title="Add Row" onclick="addSubTimerRow()">
+                <i class="fa-solid fa-plus"></i> Add Task
+              </button>
+              <button type="submit" class="btn-text primary" title="Save Goal Stack">
+                <i class="fa-solid fa-floppy-disk"></i> Save Stack
+              </button>
+              <button type="button" id="cancel-edit-stack-btn" class="btn-text danger" style="display:none;"
+                onclick="cancelStackEdit()">
+                Cancel Edit
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="stack-list" class="stack-cards-grid">
+          <!-- Dynamic Stack Cards -->
+        </div>
+      </section>
+
+      <!-- TAB 3: HISTORY LOG PANEL -->
+      <section id="panel-history" class="tab-panel" role="tabpanel">
+
+        <!-- Accumulated Time Statistics -->
+        <div class="stats-summary-grid">
+          <div class="stat-card">
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Today's Deep Work</div>
+            <div class="stat-val" id="stat-today-work">0m</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Today's Breaks</div>
+            <div class="stat-val" id="stat-today-break" style="color:var(--success-color);">0m</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Total Study Time</div>
+            <div class="stat-val" id="stat-total-work">0m</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+          <button class="btn-icon danger" title="Clear History Log" aria-label="Clear History Log"
+            onclick="clearHistory()">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+
+        <div id="history-grouped-container">
+          <!-- Grouped by Date -->
+        </div>
+      </section>
+
+      <!-- TAB 4: RECYCLE BIN PANEL -->
+      <section id="panel-bin" class="tab-panel" role="tabpanel">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+          <button class="btn-icon danger" title="Empty Recycle Bin" aria-label="Empty Recycle Bin"
+            onclick="emptyRecycleBin()">
+            <i class="fa-solid fa-dumpster"></i>
+          </button>
+        </div>
+        <ul id="bin-list" class="data-list">
+          <!-- Dynamic Bin Items -->
+        </ul>
+      </section>
+
+      <!-- TAB 5: SETTINGS PANEL -->
+      <section id="panel-settings" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <!-- Dark/Light Theme -->
+          <div class="setting-row">
+            <div class="setting-label"><span>Appearance Mode</span></div>
+            <button class="btn-icon" id="theme-toggle-btn" title="Toggle Light/Dark Theme" aria-label="Toggle Theme"
+              onclick="toggleTheme()">
+              <i class="fa-solid fa-moon" id="theme-btn-icon"></i>
+            </button>
+          </div>
+          <!-- Color Theme Switcher -->
+          <div class="setting-row">
+            <div class="setting-label"><span>Accent Color</span></div>
+            <div class="gradient-picker-group">
+              <div class="grad-swatch grad-yellow active" style="background: #fad02c;" title="Yellow"
+                onclick="setGradientTheme('yellow')"></div>
+              <div class="grad-swatch grad-orange" style="background: #fc4c00;" title="Orange"
+                onclick="setGradientTheme('orange')"></div>
+              <div class="grad-swatch grad-red" style="background: #bd0000;" title="Red"
+                onclick="setGradientTheme('red')"></div>
+              <div class="grad-swatch grad-pink" style="background: #ff3d77;" title="Pink"
+                onclick="setGradientTheme('pink')">
+              </div>
+              <div class="grad-swatch grad-purple" style="background: #8f1eae;" title="Purple"
+                onclick="setGradientTheme('purple')"></div>
+              <div class="grad-swatch grad-blue" style="background: #0084bd;" title="Blue"
+                onclick="setGradientTheme('blue')">
+              </div>
+              <div class="grad-swatch grad-green" style="background: #007d57;" title="Green"
+                onclick="setGradientTheme('green')">
+              </div>
+            </div>
+          </div>
+
+          <!-- Auto-Start Next Session Switch -->
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Auto-Start Next Session</span>
+              <span style="font-weight:400; font-size:0.75rem; color:var(--text-muted);">If OFF, pauses after timer ends
+                so you can add time or rest manually.</span>
+            </div>
+            <input type="checkbox" id="auto-start-toggle" onchange="toggleAutoStart(this.checked)"
+              style="width:20px; height:20px; cursor:pointer;">
+          </div>
+
+          <!-- Speech Voice Switch -->
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Voice Speech Announcements (TTS)</span>
+            </div>
+            <button class="btn-icon" id="settings-voice-btn" title="Toggle Voice Speech" aria-label="Toggle Voice"
+              onclick="toggleVoiceAnnounce()">
+              <i class="fa-solid fa-comment-dots" id="settings-voice-icon"></i>
+            </button>
+          </div>
+
+          <!-- Timer Sound FX Switch -->
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Timer Sound Alerts (Beeps & Chimes)</span>
+            </div>
+            <button class="btn-icon" id="settings-sound-btn" title="Toggle Sound FX" aria-label="Toggle Sound"
+              onclick="toggleSoundFx()">
+              <i class="fa-solid fa-volume-high" id="settings-sound-icon"></i>
+            </button>
+          </div>
+
+          <!-- Font Style -->
+          <div class="setting-row">
+            <div class="setting-label"><span>Font Family</span></div>
+            <select id="font-select" onchange="setFont(this.value)">
+              <option value="Poppins">Poppins</option>
+              <option value="DM Sans">DM Sans</option>
+              <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+              <option value="JetBrains Mono">JetBrains Mono</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Instrument Serif">Instrument Serif</option>
+              <option value="Comic Neue">Comic Neue</option>
+              <option value="Noto Serif">Noto Serif</option>
+              <option value="System UI">System UI</option>
+            </select>
+          </div>
+
+          <!-- Font Scale -->
+          <div class="setting-row">
+            <div class="setting-label"><span>Font Size</span></div>
+            <select id="font-scale-select" onchange="setFontScale(this.value)">
+              <option value="x-small">Extra Small</option>
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+              <option value="x-large">Extra Large</option>
+            </select>
+          </div>
+
+          <!-- App Size Scale -->
+          <div class="setting-row">
+            <div class="setting-label"><span>App Zoom & Layout Scale</span></div>
+            <select id="app-scale-select" onchange="setAppScale(this.value)">
+              <option value="compact">Compact</option>
+              <option value="standard">Standard</option>
+              <option value="large">Large</option>
+              <option value="x-large">Extra Large</option>
+            </select>
+          </div>
+
+          <!-- Reset All -->
+          <div class="setting-row">
+            <div class="setting-label"><span style="color:var(--danger-color);">Reset Application Data</span></div>
+            <button class="btn-icon danger" title="Reset All Data" aria-label="Reset All Data"
+              onclick="resetAllAppData()">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: PROFILE & SHORTCUTS PANEL -->
+      <section id="panel-profile" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="setting-label"><span>Display Name</span></div>
+            <input type="text" id="username-input" class="styled-input nav-input" value="User"
+              oninput="updateUsername(this.value)" style="width:160px;">
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <span style="font-weight:600;"><i class="fa-solid fa-keyboard"></i> Keyboard Shortcuts</span>
+          <table class="shortcuts-table">
+            <tbody>
+              <tr>
+                <td>Start / Pause Timer</td>
+                <td><kbd>Space</kbd></td>
+              </tr>
+              <tr>
+                <td>Skip Active Timer</td>
+                <td><kbd>S</kbd></td>
+              </tr>
+              <tr>
+                <td>Reset Active Timer</td>
+                <td><kbd>R</kbd></td>
+              </tr>
+              <tr>
+                <td>Navigate Inputs</td>
+                <td><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></td>
+              </tr>
+              <tr>
+                <td>Switch Workspace Tabs</td>
+                <td><kbd>1</kbd> - <kbd>6</kbd></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- JAVASCRIPT ENGINE -->
+  <script>
+    /* ==================== APP STATE ==================== */
+    const STORAGE_KEY = 'QUEUE_TIMER_V5';
+
+    const MOTIVATIONAL_MESSAGES = [
+      "Small steps every day add up to remarkable achievements!",
+      "Focus on progress, not perfection.",
+      "Your future self will thank you for the work you do right now.",
+      "Deep work is a superpower in the modern world.",
+      "Consistency beats intensity every single time.",
+      "Take it one minute at a time; you've got this!",
+      "Rest is an essential part of the high-performance process.",
+      "Great job staying disciplined and present!"
+    ];
+
+    let appData = {
+      theme: 'dark',
+      gradient: 'violet',
+      font: 'Poppins',
+      fontScale: 'medium',
+      appScale: 'standard',
+      voiceEnabled: true,
+      soundFxEnabled: true,
+      autoStartNext: false,
+      username: 'User',
+      queue: [],
+      activeIdx: 0,
+      direction: 'down',
+      stacks: [],
+      history: [],
+      bin: [],
+      activeStackInfo: null // { id, title, total, completed }
+    };
+
+    let timerInterval = null;
+    let isRunning = false;
+    const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 90;
+
+    /* ==================== CONFETTI ENGINE ==================== */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f43f5e', '#10b981', '#6366f1', '#f59e0b', '#ec4899', '#06b6d4', '#a855f7'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height * 0.4,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: Math.random() * 3 + 2,
+          speedX: Math.random() * 2 - 1,
+          rotation: Math.random() * 360,
+          rotSpeed: Math.random() * 8 - 4
+        });
+      }
+
+      let startTime = Date.now();
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.rotation += p.rotSpeed;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        if (Date.now() - startTime < 3000) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      render();
+    }
+
+    function updateMotivationalQuote() {
+      const quoteEl = document.getElementById('motivation-banner-text');
+      if (quoteEl) {
+        const randomQuote = MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)];
+        quoteEl.textContent = `"${randomQuote}"`;
+      }
+    }
+
+    /* ==================== AUDIO & SPEECH SYNTHESIS ==================== */
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playBeep(type) {
+      if (!appData.soundFxEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'start') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(1040, now + 0.12);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'end') {
+        [0, 0.14, 0.28].forEach((delay, i) => {
+          const t = now + delay;
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(i === 2 ? 1046.5 : 783.9, t);
+          g.gain.setValueAtTime(0.2, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.start(t);
+          o.stop(t + 0.12);
+        });
+      }
+    }
+
+    function speakText(msg) {
+      if (!appData.voiceEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(msg);
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function announceScreenReader(msg) {
+      document.getElementById('sr-announcements').textContent = msg;
+    }
+
+    /* ==================== INITIALIZATION ==================== */
+    function initApp() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {appData = {...appData, ...JSON.parse(saved)};} catch (e) { }
+      }
+
+      if (appData.stacks.length === 0) {
+        appData.stacks.push({
+          id: Date.now(),
+          title: "Pomodoro Focus Workflow",
+          timers: [
+            {name: "Deep Work", durationSec: 1500},
+            {name: "Short Break", durationSec: 300},
+            {name: "Deep Work", durationSec: 1500},
+            {name: "Long Break", durationSec: 900}
+          ]
+        });
+      }
+
+      // Apply settings to DOM
+      document.documentElement.setAttribute('data-theme', appData.theme);
+      document.documentElement.setAttribute('data-theme-gradient', appData.gradient);
+      document.documentElement.setAttribute('data-font', appData.font);
+      document.documentElement.setAttribute('data-font-scale', appData.fontScale);
+      document.documentElement.setAttribute('data-app-scale', appData.appScale);
+
+      document.getElementById('font-select').value = appData.font;
+      document.getElementById('font-scale-select').value = appData.fontScale;
+      document.getElementById('app-scale-select').value = appData.appScale;
+      document.getElementById('username-input').value = appData.username;
+      document.getElementById('auto-start-toggle').checked = appData.autoStartNext;
+
+      updateGradientSwatchesUI();
+      updateAudioVoiceUI();
+      updateThemeUI();
+      updateAvatarInitials();
+
+      renderQueue();
+      renderStacks();
+      renderHistory();
+      renderBin();
+      updateTimerDisplay();
+      resetStackBuilderForm();
+      setupKeyboardNavigation();
+      updateMotivationalQuote();
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    /* ==================== SETTINGS & THEMES ==================== */
+    function updateUsername(name) {
+      appData.username = name.trim() || 'User';
+      updateAvatarInitials();
+      saveData();
+    }
+
+    function updateAvatarInitials() {
+      const parts = appData.username.trim().split(' ');
+      let initials = parts[0] ? parts[0][0] : 'U';
+      if (parts.length > 1 && parts[1][0]) initials += parts[1][0];
+
+      document.querySelectorAll('.avatar-initials').forEach(el => {
+        el.textContent = initials.toUpperCase();
+      });
+    }
+
+    function toggleTheme() {
+      appData.theme = appData.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', appData.theme);
+      updateThemeUI();
+      saveData();
+    }
+
+    function updateThemeUI() {
+      document.getElementById('theme-btn-icon').className = appData.theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    }
+
+    function setGradientTheme(gradKey) {
+      appData.gradient = gradKey;
+      document.documentElement.setAttribute('data-theme-gradient', gradKey);
+      updateGradientSwatchesUI();
+      saveData();
+    }
+
+    function updateGradientSwatchesUI() {
+      document.querySelectorAll('.grad-swatch').forEach(swatch => {
+        swatch.classList.remove('active');
+      });
+      const activeSwatch = document.querySelector(`.grad-${appData.gradient}`);
+      if (activeSwatch) activeSwatch.classList.add('active');
+    }
+
+    function setFont(fontName) {
+      appData.font = fontName;
+      document.documentElement.setAttribute('data-font', fontName);
+      saveData();
+    }
+
+    function setFontScale(scale) {
+      appData.fontScale = scale;
+      document.documentElement.setAttribute('data-font-scale', scale);
+      saveData();
+    }
+
+    function setAppScale(scale) {
+      appData.appScale = scale;
+      document.documentElement.setAttribute('data-app-scale', scale);
+      saveData();
+    }
+
+    function toggleVoiceAnnounce() {
+      appData.voiceEnabled = !appData.voiceEnabled;
+      updateAudioVoiceUI();
+      announceScreenReader(appData.voiceEnabled ? 'Voice Announcements Enabled' : 'Voice Announcements Disabled');
+      saveData();
+    }
+
+    function toggleSoundFx() {
+      appData.soundFxEnabled = !appData.soundFxEnabled;
+      updateAudioVoiceUI();
+      announceScreenReader(appData.soundFxEnabled ? 'Sound Effects Enabled' : 'Sound Effects Muted');
+      saveData();
+    }
+
+    function toggleAutoStart(val) {
+      appData.autoStartNext = val;
+      saveData();
+    }
+
+    function updateAudioVoiceUI() {
+      const voiceIcon = appData.voiceEnabled ? 'fa-solid fa-comment-dots' : 'fa-solid fa-comment-slash';
+      document.getElementById('quick-voice-icon').className = voiceIcon;
+      document.getElementById('settings-voice-icon').className = voiceIcon;
+
+      const soundIcon = appData.soundFxEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+      document.getElementById('quick-sound-icon').className = soundIcon;
+      document.getElementById('settings-sound-icon').className = soundIcon;
+    }
+
+    function resetAllAppData() {
+      if (confirm("Are you sure you want to permanently reset all application data?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    /* ==================== TAB SWITCHING ==================== */
+    function switchTab(tabName) {
+      document.querySelectorAll('.nav-btn, .sidebar .avatar-btn, #mobile-header-avatar').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      const activePanel = document.getElementById(`panel-${tabName}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.setAttribute('aria-selected', 'true');
+      }
+      if (activePanel) activePanel.classList.add('active');
+
+      const headerTitle = document.getElementById('header-tab-title');
+      const iconsMap = {
+        timer: '<i class="fa-solid fa-clock"></i> <span>Timer Workspace</span>',
+        stack: '<i class="fa-solid fa-layer-group"></i> <span>Goal Workflows</span>',
+        history: '<i class="fa-solid fa-clock-rotate-left"></i> <span>Session Logs</span>',
+        bin: '<i class="fa-solid fa-trash-can"></i> <span>Recycle Bin</span>',
+        settings: '<i class="fa-solid fa-sliders"></i> <span>Settings</span>',
+        profile: '<i class="fa-solid fa-user"></i> <span>Profile & Shortcuts</span>'
+      };
+      headerTitle.innerHTML = iconsMap[tabName] || 'QueueTimer';
+      updateMotivationalQuote();
+    }
+
+    /* ==================== TIMER ENGINE ==================== */
+    function toggleDirection() {
+      appData.direction = appData.direction === 'down' ? 'up' : 'down';
+      saveData();
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const current = appData.queue[appData.activeIdx];
+      const nameEl = document.getElementById('current-timer-name');
+      const timeEl = document.getElementById('time-display');
+      const badgeText = document.getElementById('direction-text');
+      const badgeIcon = document.getElementById('direction-icon');
+      const circleProgress = document.getElementById('circle-progress');
+
+      if (!current) {
+        nameEl.textContent = "No Active Timer";
+        timeEl.textContent = "00:00:00";
+        badgeText.textContent = appData.direction === 'down' ? 'Count-Down' : 'Count-Up';
+        badgeIcon.className = appData.direction === 'down' ? 'fa-solid fa-arrow-down-long' : 'fa-solid fa-arrow-up-long';
+        circleProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+        updateStackProgressBar();
+        return;
+      }
+
+      nameEl.textContent = current.name;
+      badgeText.textContent = appData.direction === 'down' ? 'Count-Down' : 'Count-Up';
+      badgeIcon.className = appData.direction === 'down' ? 'fa-solid fa-arrow-down-long' : 'fa-solid fa-arrow-up-long';
+
+      const total = current.durationSec;
+      const remaining = current.remainingSec;
+      const elapsed = total - remaining;
+
+      const displaySecs = appData.direction === 'down' ? remaining : elapsed;
+      timeEl.textContent = formatTimeDisplay(displaySecs);
+
+      const progressRatio = appData.direction === 'down' ? (remaining / total) : (elapsed / total);
+      const offset = CIRCLE_CIRCUMFERENCE - (progressRatio * CIRCLE_CIRCUMFERENCE);
+      circleProgress.style.strokeDashoffset = offset;
+
+      updateStackProgressBar();
+    }
+
+    function addTimeToCurrent(secs) {
+      if (!appData.queue[appData.activeIdx]) return;
+      const current = appData.queue[appData.activeIdx];
+      current.durationSec += secs;
+      current.remainingSec += secs;
+      updateTimerDisplay();
+      renderQueue();
+      saveData();
+      speakText(`Added ${Math.round(secs / 60)} minutes`);
+    }
+
+    function updateStackProgressBar() {
+      const wrap = document.getElementById('stack-progress-wrap');
+      if (!appData.activeStackInfo) {
+        wrap.classList.remove('active');
+        return;
+      }
+      wrap.classList.add('active');
+      const info = appData.activeStackInfo;
+      const pct = Math.round((info.completed / info.total) * 100) || 0;
+      document.getElementById('stack-progress-title').textContent = `${info.title} (${info.completed}/${info.total})`;
+      document.getElementById('stack-progress-text').textContent = `${pct}%`;
+      document.getElementById('stack-progress-fill').style.width = `${pct}%`;
+    }
+
+    function formatTimeDisplay(sec) {
+      const hrs = Math.floor(sec / 3600);
+      const mins = Math.floor((sec % 3600) / 60);
+      const secs = sec % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+
+      if (hrs > 0) return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+      return `${pad(mins)}:${pad(secs)}`;
+    }
+
+    function toggleTimer() {
+      initAudio();
+      if (appData.queue.length === 0) return;
+      if (isRunning) pauseTimer(); else startTimer();
+    }
+
+    function startTimer() {
+      if (appData.queue.length === 0) return;
+      isRunning = true;
+      document.getElementById('start-icon').className = 'fa-solid fa-pause';
+      playBeep('start');
+
+      const current = appData.queue[appData.activeIdx];
+      speakText(`Starting ${current.name}`);
+      announceScreenReader(`Timer ${current.name} started`);
+      updateMotivationalQuote();
+
+      timerInterval = setInterval(() => {
+        if (current && current.remainingSec > 0) {
+          current.remainingSec--;
+          updateTimerDisplay();
+        } else if (current && current.remainingSec <= 0) {
+          completeCurrentTimer();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('start-icon').className = 'fa-solid fa-play';
+      speakText("Paused");
+      announceScreenReader("Timer paused");
+      saveData();
+    }
+
+    function completeCurrentTimer() {
+      pauseTimer();
+      playBeep('end');
+      triggerConfetti();
+
+      const completed = appData.queue[appData.activeIdx];
+      if (completed) {
+        speakText(`${completed.name} finished`);
+
+        const now = new Date();
+        const dateKey = now.toISOString().split('T')[0]; // YYYY-MM-DD
+
+        appData.history.unshift({
+          id: Date.now(),
+          name: completed.name,
+          durationSec: completed.durationSec,
+          dateKey: dateKey,
+          completedAt: now.toLocaleString([], {hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric'})
+        });
+        renderHistory();
+
+        if (appData.activeStackInfo) {
+          appData.activeStackInfo.completed++;
+        }
+      }
+
+      // Check if more items exist
+      if (appData.activeIdx < appData.queue.length - 1) {
+        appData.activeIdx++;
+        renderQueue();
+        updateTimerDisplay();
+
+        // Respect auto-start setting
+        if (appData.autoStartNext) {
+          startTimer();
+        }
+      } else {
+        // Stack/Queue finished
+        appData.queue = [];
+        appData.activeIdx = 0;
+        appData.activeStackInfo = null;
+        renderQueue();
+        updateTimerDisplay();
+      }
+      saveData();
+    }
+
+    function skipTimer() {
+      if (appData.queue.length === 0) return;
+      pauseTimer();
+      if (appData.activeIdx < appData.queue.length - 1) {
+        appData.activeIdx++;
+        if (appData.activeStackInfo) appData.activeStackInfo.completed++;
+      } else {
+        appData.queue = [];
+        appData.activeIdx = 0;
+        appData.activeStackInfo = null;
+      }
+      renderQueue();
+      updateTimerDisplay();
+      saveData();
+    }
+
+    function resetCurrentTimer() {
+      if (!appData.queue[appData.activeIdx]) return;
+      appData.queue[appData.activeIdx].remainingSec = appData.queue[appData.activeIdx].durationSec;
+      updateTimerDisplay();
+      saveData();
+    }
+
+    /* ==================== QUEUE MANAGEMENT ==================== */
+    function renderQueue() {
+      const list = document.getElementById('queue-list');
+      list.innerHTML = '';
+
+      if (appData.queue.length === 0) {
+        list.innerHTML = `<li class="empty-msg">Queue is empty. Add a task below or load a Goal Stack!</li>`;
+        return;
+      }
+
+      appData.queue.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = `queue-item ${index === appData.activeIdx ? 'active' : ''}`;
+
+        const badge = index === appData.activeIdx ? '▶ Active' : `#${index + 1}`;
+
+        li.innerHTML = `
+          <div>
+            <strong>${item.name}</strong> 
+            <span style="color:var(--text-muted); margin-left:4px;">(${formatTimeDisplay(item.durationSec)})</span>
+            <span class="pill" style="margin-left:6px;">${badge}</span>
+          </div>
+          <div class="queue-item-actions">
+            <button class="btn-icon" style="width:26px; height:26px; font-size:0.7rem;" title="Move Up" onclick="moveQueueItem(${index}, -1)">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button class="btn-icon" style="width:26px; height:26px; font-size:0.7rem;" title="Move Down" onclick="moveQueueItem(${index}, 1)">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <button class="btn-icon" style="width:26px; height:26px; font-size:0.7rem;" title="Edit Task" onclick="editQueueItem(${index})">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon danger" style="width:26px; height:26px; font-size:0.7rem;" title="Delete Item" onclick="softDeleteQueueItem(${index})">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function moveQueueItem(idx, direction) {
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= appData.queue.length) return;
+
+      const temp = appData.queue[idx];
+      appData.queue[idx] = appData.queue[newIdx];
+      appData.queue[newIdx] = temp;
+
+      if (appData.activeIdx === idx) appData.activeIdx = newIdx;
+      else if (appData.activeIdx === newIdx) appData.activeIdx = idx;
+
+      renderQueue();
+      updateTimerDisplay();
+      saveData();
+    }
+
+    function editQueueItem(idx) {
+      const item = appData.queue[idx];
+      if (!item) return;
+      const newName = prompt("Edit Task Name:", item.name);
+      if (newName !== null && newName.trim() !== '') {
+        item.name = newName.trim();
+        renderQueue();
+        updateTimerDisplay();
+        saveData();
+      }
+    }
+
+    function addManualTimer(e) {
+      e.preventDefault();
+      const name = document.getElementById('manual-name').value.trim() || 'Timer Task';
+      const hr = parseInt(document.getElementById('manual-hr').value) || 0;
+      const min = parseInt(document.getElementById('manual-min').value) || 0;
+      const sec = parseInt(document.getElementById('manual-sec').value) || 0;
+      const pos = document.getElementById('queue-insert-pos').value;
+
+      const totalSec = hr * 3600 + min * 60 + sec;
+      if (totalSec <= 0) return;
+
+      const newItem = {id: Date.now(), name, durationSec: totalSec, remainingSec: totalSec};
+
+      if (pos === 'next' && appData.queue.length > 0) {
+        appData.queue.splice(appData.activeIdx + 1, 0, newItem);
+      } else {
+        appData.queue.push(newItem);
+      }
+
+      if (appData.activeStackInfo) {
+        appData.activeStackInfo.total++;
+      }
+
+      renderQueue();
+      updateTimerDisplay();
+      saveData();
+
+      document.getElementById('manual-name').value = '';
+      document.getElementById('manual-hr').value = '';
+      document.getElementById('manual-min').value = '';
+      document.getElementById('manual-sec').value = '';
+    }
+
+    function softDeleteQueueItem(idx) {
+      const deleted = appData.queue.splice(idx, 1)[0];
+      if (deleted) {
+        appData.bin.unshift({id: Date.now(), type: 'queue', data: deleted, deletedAt: new Date().toLocaleString()});
+      }
+      if (appData.activeIdx >= appData.queue.length) {
+        appData.activeIdx = Math.max(0, appData.queue.length - 1);
+      }
+      renderQueue();
+      renderBin();
+      updateTimerDisplay();
+      saveData();
+    }
+
+    function clearQueue() {
+      pauseTimer();
+      appData.queue.forEach(item => {
+        appData.bin.unshift({id: Date.now() + Math.random(), type: 'queue', data: item, deletedAt: new Date().toLocaleString()});
+      });
+      appData.queue = [];
+      appData.activeIdx = 0;
+      appData.activeStackInfo = null;
+      renderQueue();
+      renderBin();
+      updateTimerDisplay();
+      saveData();
+    }
+
+    /* ==================== GOAL STACKS TAB ==================== */
+    function addSubTimerRow(name = '', hr = '', min = '', sec = '') {
+      const container = document.getElementById('sub-timer-container');
+      const row = document.createElement('div');
+      row.className = 'sub-timer-row';
+      row.innerHTML = `
+        <input type="text" class="sub-name nav-input" placeholder="Sub-Task Name" value="${name}" required>
+        <input type="number" class="time-num-input sub-hr nav-input" placeholder="00h" min="0" value="${hr}">
+        <input type="number" class="time-num-input sub-min nav-input" placeholder="25m" min="0" max="59" value="${min}">
+        <input type="number" class="time-num-input sub-sec nav-input" placeholder="00s" min="0" max="59" value="${sec}">
+        <button type="button" class="btn-icon" style="width:26px; height:26px; font-size:0.7rem;" title="Duplicate Row" onclick="duplicateSubTimerRow(this)">
+          <i class="fa-solid fa-clone"></i>
+        </button>
+        <button type="button" class="btn-icon" style="width:26px; height:26px; font-size:0.7rem;" title="Move Up" onclick="moveSubTimerRow(this, -1)">
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+        <button type="button" class="btn-icon" style="width:26px; height:26px; font-size:0.7rem;" title="Move Down" onclick="moveSubTimerRow(this, 1)">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <button type="button" class="btn-icon danger" style="width:26px; height:26px; font-size:0.7rem;" title="Remove Row" onclick="this.parentElement.remove()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      `;
+      container.appendChild(row);
+    }
+
+    function duplicateSubTimerRow(btn) {
+      const row = btn.parentElement;
+      const clone = row.cloneNode(true);
+      row.parentNode.insertBefore(clone, row.nextSibling);
+    }
+
+    function moveSubTimerRow(btn, dir) {
+      const row = btn.parentElement;
+      if (dir === -1 && row.previousElementSibling) {
+        row.parentNode.insertBefore(row, row.previousElementSibling);
+      } else if (dir === 1 && row.nextElementSibling) {
+        row.parentNode.insertBefore(row.nextElementSibling, row);
+      }
+    }
+
+    function resetStackBuilderForm() {
+      document.getElementById('editing-stack-id').value = '';
+      document.getElementById('stack-title').value = '';
+      document.getElementById('stack-form-heading').textContent = "Create New Goal Stack";
+      document.getElementById('cancel-edit-stack-btn').style.display = 'none';
+
+      document.getElementById('sub-timer-container').innerHTML = '';
+      addSubTimerRow('Deep Work', 0, 25, 0);
+      addSubTimerRow('Short Break', 0, 5, 0);
+    }
+
+    function editStack(stackIdx) {
+      const stack = appData.stacks[stackIdx];
+      if (!stack) return;
+
+      document.getElementById('editing-stack-id').value = stack.id;
+      document.getElementById('stack-title').value = stack.title;
+      document.getElementById('stack-form-heading').textContent = `Edit Stack: ${stack.title}`;
+      document.getElementById('cancel-edit-stack-btn').style.display = 'inline-flex';
+
+      const container = document.getElementById('sub-timer-container');
+      container.innerHTML = '';
+
+      stack.timers.forEach(t => {
+        const hr = Math.floor(t.durationSec / 3600);
+        const min = Math.floor((t.durationSec % 3600) / 60);
+        const sec = t.durationSec % 60;
+        addSubTimerRow(t.name, hr || '', min || '', sec || '');
+      });
+
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function cancelStackEdit() {
+      resetStackBuilderForm();
+    }
+
+    function saveNewStack(e) {
+      e.preventDefault();
+      const editingId = document.getElementById('editing-stack-id').value;
+      const title = document.getElementById('stack-title').value.trim();
+      const rows = document.querySelectorAll('#sub-timer-container .sub-timer-row');
+
+      const timers = [];
+      rows.forEach(row => {
+        const name = row.querySelector('.sub-name').value.trim() || 'Task';
+        const hr = parseInt(row.querySelector('.sub-hr').value) || 0;
+        const min = parseInt(row.querySelector('.sub-min').value) || 0;
+        const sec = parseInt(row.querySelector('.sub-sec').value) || 0;
+        const durationSec = hr * 3600 + min * 60 + sec;
+
+        if (durationSec > 0) timers.push({name, durationSec});
+      });
+
+      if (timers.length === 0) return;
+
+      if (editingId) {
+        const existingIdx = appData.stacks.findIndex(s => s.id == editingId);
+        if (existingIdx !== -1) {
+          appData.stacks[existingIdx].title = title;
+          appData.stacks[existingIdx].timers = timers;
+        }
+      } else {
+        appData.stacks.push({id: Date.now(), title, timers, lastProgress: 0});
+      }
+
+      resetStackBuilderForm();
+      renderStacks();
+      saveData();
+    }
+
+    function renderStacks() {
+      const container = document.getElementById('stack-list');
+      container.innerHTML = '';
+
+      if (appData.stacks.length === 0) {
+        container.innerHTML = `<div class="empty-msg">No saved stacks. Create one above!</div>`;
+        return;
+      }
+
+      appData.stacks.forEach((stack, idx) => {
+        const card = document.createElement('div');
+        card.className = 'stack-card';
+
+        const pills = stack.timers.map(t => `<span class="pill"><i class="fa-solid fa-stopwatch"></i> ${t.name}: ${formatTimeDisplay(t.durationSec)}</span>`).join(' ');
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${stack.title}</strong>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-icon" style="width:28px; height:28px; font-size:0.75rem;" title="Edit Stack" onclick="editStack(${idx})">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn-icon danger" style="width:28px; height:28px; font-size:0.75rem;" title="Delete Stack" onclick="softDeleteStack(${idx})">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">${pills}</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-text primary" style="flex:1; justify-content:center;" title="Run Stack from Beginning" onclick="loadAndRunStack(${idx}, false)">
+              <i class="fa-solid fa-play"></i> Start Fresh
+            </button>
+            ${stack.lastProgress && stack.lastProgress > 0 && stack.lastProgress < stack.timers.length ? `
+              <button class="btn-text" style="flex:1; justify-content:center;" title="Resume from where left off" onclick="loadAndRunStack(${idx}, true)">
+                <i class="fa-solid fa-rotate-right"></i> Resume (#${stack.lastProgress + 1})
+              </button>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function loadAndRunStack(stackIdx, resume = false) {
+      const stack = appData.stacks[stackIdx];
+      if (!stack) return;
+
+      pauseTimer();
+
+      let startIdx = 0;
+      if (resume && stack.lastProgress) {
+        startIdx = stack.lastProgress;
+      }
+
+      const selectedTimers = stack.timers.slice(startIdx);
+
+      appData.queue = selectedTimers.map(t => ({
+        id: Date.now() + Math.random(),
+        name: t.name,
+        durationSec: t.durationSec,
+        remainingSec: t.durationSec
+      }));
+
+      appData.activeIdx = 0;
+      appData.activeStackInfo = {
+        id: stack.id,
+        title: stack.title,
+        total: stack.timers.length,
+        completed: startIdx
+      };
+
+      renderQueue();
+      updateTimerDisplay();
+      saveData();
+      switchTab('timer');
+    }
+
+    function softDeleteStack(idx) {
+      const deleted = appData.stacks.splice(idx, 1)[0];
+      if (deleted) {
+        appData.bin.unshift({id: Date.now(), type: 'stack', data: deleted, deletedAt: new Date().toLocaleString()});
+      }
+      renderStacks();
+      renderBin();
+      saveData();
+    }
+
+    /* ==================== HISTORY LOG & STATS ==================== */
+    function renderHistory() {
+      const container = document.getElementById('history-grouped-container');
+      container.innerHTML = '';
+
+      let todayWorkSec = 0;
+      let todayBreakSec = 0;
+      let totalWorkSec = 0;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Calculate totals
+      appData.history.forEach(item => {
+        const isBreak = item.name.toLowerCase().includes('break') || item.name.toLowerCase().includes('rest');
+
+        if (item.dateKey === todayStr) {
+          if (isBreak) todayBreakSec += item.durationSec;
+          else todayWorkSec += item.durationSec;
+        }
+
+        if (!isBreak) totalWorkSec += item.durationSec;
+      });
+
+      document.getElementById('stat-today-work').textContent = formatMinsOrHours(todayWorkSec);
+      document.getElementById('stat-today-break').textContent = formatMinsOrHours(todayBreakSec);
+      document.getElementById('stat-total-work').textContent = formatMinsOrHours(totalWorkSec);
+
+      if (appData.history.length === 0) {
+        container.innerHTML = `<div class="empty-msg">No completed sessions logged yet.</div>`;
+        return;
+      }
+
+      // Group by DateKey
+      const groups = {};
+      appData.history.forEach(item => {
+        const k = item.dateKey || 'Earlier';
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(item);
+      });
+
+      Object.keys(groups).forEach(dateKey => {
+        const header = document.createElement('div');
+        header.className = 'history-date-header';
+
+        if (dateKey === todayStr) header.textContent = 'Today';
+        else header.textContent = dateKey;
+
+        container.appendChild(header);
+
+        const ul = document.createElement('ul');
+        ul.className = 'data-list';
+
+        groups[dateKey].forEach(item => {
+          const originalIdx = appData.history.indexOf(item);
+          const li = document.createElement('li');
+          li.className = 'data-card';
+          li.innerHTML = `
+            <div>
+              <strong>${item.name}</strong> 
+              <span style="color:var(--text-muted); margin-left:4px;">(${formatTimeDisplay(item.durationSec)})</span>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${item.completedAt}</div>
+            </div>
+            <button class="btn-icon danger" style="width:26px; height:26px; font-size:0.75rem;" title="Delete Log" onclick="softDeleteHistory(${originalIdx})">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+          ul.appendChild(li);
+        });
+
+        container.appendChild(ul);
+      });
+    }
+
+    function formatMinsOrHours(totalSec) {
+      const hrs = Math.floor(totalSec / 3600);
+      const mins = Math.floor((totalSec % 3600) / 60);
+      if (hrs > 0) return `${hrs}h ${mins}m`;
+      return `${mins}m`;
+    }
+
+    function softDeleteHistory(idx) {
+      const deleted = appData.history.splice(idx, 1)[0];
+      if (deleted) {
+        appData.bin.unshift({id: Date.now(), type: 'history', data: deleted, deletedAt: new Date().toLocaleString()});
+      }
+      renderHistory();
+      renderBin();
+      saveData();
+    }
+
+    function clearHistory() {
+      appData.history.forEach(item => {
+        appData.bin.unshift({id: Date.now() + Math.random(), type: 'history', data: item, deletedAt: new Date().toLocaleString()});
+      });
+      appData.history = [];
+      renderHistory();
+      renderBin();
+      saveData();
+    }
+
+    /* ==================== RECYCLE BIN ==================== */
+    function renderBin() {
+      const list = document.getElementById('bin-list');
+      list.innerHTML = '';
+
+      if (appData.bin.length === 0) {
+        list.innerHTML = `<li class="empty-msg">Recycle Bin is empty.</li>`;
+        return;
+      }
+
+      appData.bin.forEach((item, idx) => {
+        const li = document.createElement('li');
+        li.className = 'data-card';
+
+        let title = item.data.name || item.data.title || 'Item';
+        let typeBadge = item.type.toUpperCase();
+
+        li.innerHTML = `
+          <div>
+            <strong>${title}</strong> <span class="pill">${typeBadge}</span>
+            <div style="font-size:0.75rem; color:var(--text-muted);">${item.deletedAt}</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-icon primary" style="width:30px; height:30px;" title="Restore Item" onclick="restoreBinItem(${idx})">
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+            <button class="btn-icon danger" style="width:30px; height:30px;" title="Permanently Delete" onclick="permanentlyDeleteBinItem(${idx})">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function restoreBinItem(idx) {
+      const restored = appData.bin.splice(idx, 1)[0];
+      if (!restored) return;
+
+      if (restored.type === 'queue') {
+        appData.queue.push(restored.data);
+        renderQueue();
+        updateTimerDisplay();
+      } else if (restored.type === 'stack') {
+        appData.stacks.push(restored.data);
+        renderStacks();
+      } else if (restored.type === 'history') {
+        appData.history.unshift(restored.data);
+        renderHistory();
+      }
+
+      renderBin();
+      saveData();
+    }
+
+    function permanentlyDeleteBinItem(idx) {
+      appData.bin.splice(idx, 1);
+      renderBin();
+      saveData();
+    }
+
+    function emptyRecycleBin() {
+      if (confirm("Permanently empty all items in the Recycle Bin?")) {
+        appData.bin = [];
+        renderBin();
+        saveData();
+      }
+    }
+
+    /* ==================== KEYBOARD ACCESSIBILITY & ARROW NAVIGATION ==================== */
+    function setupKeyboardNavigation() {
+      document.addEventListener('keydown', (e) => {
+        const active = document.activeElement;
+        const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName);
+
+        if (isInput) {
+          // Arrow key navigation between form fields
+          if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            const inputs = Array.from(document.querySelectorAll('.nav-input'));
+            const idx = inputs.indexOf(active);
+
+            if (idx !== -1) {
+              if (e.key === 'ArrowDown' && idx < inputs.length - 1) {
+                e.preventDefault();
+                inputs[idx + 1].focus();
+              } else if (e.key === 'ArrowUp' && idx > 0) {
+                e.preventDefault();
+                inputs[idx - 1].focus();
+              } else if (e.key === 'ArrowRight' && active.classList.contains('time-num-input') && idx < inputs.length - 1) {
+                e.preventDefault();
+                inputs[idx + 1].focus();
+              } else if (e.key === 'ArrowLeft' && active.classList.contains('time-num-input') && idx > 0) {
+                e.preventDefault();
+                inputs[idx - 1].focus();
+              }
+            }
+          }
+          return;
+        }
+
+        // Global shortcuts when not in input
+        if (e.code === 'Space') {
+          e.preventDefault();
+          toggleTimer();
+        } else if (e.key.toLowerCase() === 's') {
+          skipTimer();
+        } else if (e.key.toLowerCase() === 'r') {
+          resetCurrentTimer();
+        } else if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+          const map = {'1': 'timer', '2': 'stack', '3': 'history', '4': 'bin', '5': 'settings', '6': 'profile'};
+          switchTab(map[e.key]);
+        }
+      });
+    }
+
+    /* Boot Engine */
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+
+</html>
